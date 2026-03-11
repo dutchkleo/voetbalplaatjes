@@ -108,11 +108,7 @@
 
 <header>
     <h1>Mijn Voetbalplaatjes 2025-2026</h1>
-    <div style="background: #eee; padding: 10px; text-align: center; margin-bottom: 20px;">
-    <button onclick="exporteerData()" style="padding: 10px; cursor: pointer;">💾 Opslaan (Bestand downloaden)</button>
-    <button onclick="importeerData()" style="padding: 10px; cursor: pointer;">📂 Laden (Bestand openen)</button>
-
-</header>
+   </header>
 
 <div class="container" id="app">
     </div>
@@ -137,7 +133,10 @@
         <div style="margin-top: 8px; color: #ffcc00;">
             <strong>Dubbel (ruilmateriaal):</strong> <span id="lijst-dubbel">-</span>
         </div>
-    </div>
+    </div> <div style="background: #eee; padding: 10px; text-align: center; margin-bottom: 20px;">
+    <button onclick="exporteerData()" style="padding: 10px; cursor: pointer;">💾 Opslaan (Bestand downloaden)</button>
+    <button onclick="importeerData()" style="padding: 10px; cursor: pointer;">📂 Laden (Bestand openen)</button>
+
 </div>
 
 <script>
@@ -257,20 +256,52 @@
         document.getElementById('lijst-nodig').innerText = mis.length > 0 ? mis.join(', ') : 'Alles compleet! 🎉';
         document.getElementById('lijst-dubbel').innerText = dubbelLijst.length > 0 ? dubbelLijst.join(', ') : 'Nog geen dubbelen';
     }
-// Hiermee kan je het bestandje inladen op een andere computer
+// Verbeterde export-functie
+function exporteerData() {
+    try {
+        // Haal de huidige status op uit localStorage
+        const huidigeStatus = localStorage.getItem('voetbalStatus');
+        
+        if (!huidigeStatus || huidigeStatus === '{}') {
+            alert("Er is nog geen data om op te slaan. Vink eerst wat plaatjes aan!");
+            return;
+        }
+
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(huidigeStatus);
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", "plus_voetbal_stand_2025.json");
+        document.body.appendChild(downloadAnchorNode); // Vereist voor sommige browsers
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+    } catch (e) {
+        alert("Oeps, er ging iets mis bij het exporteren: " + e.message);
+    }
+}
+
+// Verbeterde import-functie
 function importeerData() {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = '.json';
+    
     input.onchange = e => {
         const file = e.target.files[0];
+        if (!file) return;
+
         const reader = new FileReader();
         reader.onload = readerEvent => {
-            const content = readerEvent.target.result;
-            const nieuweStatus = JSON.parse(content);
-            if (confirm("Weet je het zeker? Dit overschrijft de huidige vinkjes.")) {
-                localStorage.setItem('voetbalStatus', JSON.stringify(nieuweStatus));
-                location.reload(); // Ververs de pagina om de vinkjes te zien
+            try {
+                const content = readerEvent.target.result;
+                // Check of het wel echte JSON data is
+                JSON.parse(content); 
+                
+                if (confirm("Weet je het zeker? Je huidige vinkjes worden vervangen door de vinkjes uit dit bestand.")) {
+                    localStorage.setItem('voetbalStatus', content);
+                    location.reload(); 
+                }
+            } catch (err) {
+                alert("Fout: Dit bestand is niet geldig of beschadigd.");
             }
         }
         reader.readAsText(file);
@@ -283,5 +314,6 @@ function importeerData() {
 </body>
 
 </html>
+
 
 
