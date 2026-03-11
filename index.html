@@ -129,7 +129,10 @@
         </div>
     </div>
     <div id="lijsten" class="list-output">
-        <strong>Nog nodig:</strong> <span id="lijst-nodig">-</span>
+        <div><strong>Nog nodig:</strong> <span id="lijst-nodig">-</span></div>
+        <div style="margin-top: 8px; color: #ffcc00;">
+            <strong>Dubbel (ruilmateriaal):</strong> <span id="lijst-dubbel">-</span>
+        </div>
     </div>
 </div>
 
@@ -211,16 +214,28 @@
 
     function updateStats() {
         let mis = [];
-        let dubbel = 0;
+        let dubbelLijst = []; // Nieuwe lijst voor de nummers die je dubbel hebt
+        let dubbelAantal = 0;
         let completeClubs = 0;
 
-        // Bereken stats
+        // We lopen door alle 288 plaatjes heen
         for (let i = 1; i <= 288; i++) {
             const aantal = status[i] || 0;
-            if (aantal === 0) mis.push(i);
-            if (aantal >= 2) dubbel += (aantal - 1);
+            
+            if (aantal === 0) {
+                mis.push(i);
+            }
+            
+            if (aantal >= 2) {
+                // We voegen het nummer toe aan de lijst van dubbelen
+                // We zetten erbij hoeveel je er extra hebt (bijv. "12 (2x)")
+                const extra = aantal - 1;
+                dubbelLijst.push(`${i} (${extra}x)`);
+                dubbelAantal += extra;
+            }
         }
 
+        // Clubs controleren op compleetheid
         data.forEach(item => {
             let compleet = true;
             for (let i = item.start; i <= item.eind; i++) {
@@ -229,10 +244,14 @@
             if (compleet) completeClubs++;
         });
 
+        // De resultaten op het scherm zetten
         document.getElementById('count-missend').innerText = mis.length;
-        document.getElementById('count-dubbel').innerText = dubbel;
+        document.getElementById('count-dubbel').innerText = dubbelAantal;
         document.getElementById('count-compleet').innerText = completeClubs;
-        document.getElementById('lijst-nodig').innerText = mis.length > 0 ? mis.join(', ') : 'Alles compleet!';
+        
+        // De tekstlijstjes invullen
+        document.getElementById('lijst-nodig').innerText = mis.length > 0 ? mis.join(', ') : 'Alles compleet! 🎉';
+        document.getElementById('lijst-dubbel').innerText = dubbelLijst.length > 0 ? dubbelLijst.join(', ') : 'Nog geen dubbelen';
     }
 
     renderApp();
@@ -241,3 +260,4 @@
 </body>
 
 </html>
+
