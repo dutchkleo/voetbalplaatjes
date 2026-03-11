@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLUS Voetbalplaatjes Tracker 2025-2026</title>
+    <style>
+        :root {
+            --plus-groen: #00a651;
+            --plus-wit: #ffffff;
+            --plus-rood: #ed1c24;
+            --plus-blauw: #0054a6;
+            --plus-zwart: #333333;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: var(--plus-zwart);
+            margin: 0;
+            padding: 20px;
+        }
+
+        header {
+            background-color: var(--plus-groen);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 5px solid var(--plus-rood);
+            margin-bottom: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .club-section {
+            background: white;
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .club-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--plus-groen);
+            margin-bottom: 10px;
+        }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .compleet { background-color: var(--plus-groen); color: white; }
+        .niet-compleet { background-color: #eee; color: #777; }
+
+        .sticker-row {
+            display: grid;
+            grid-template-columns: 50px 1fr auto;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .radio-group label {
+            margin-left: 5px;
+            margin-right: 10px;
+            font-size: 0.9em;
+        }
+
+        #overzicht {
+            position: sticky;
+            bottom: 0;
+            background: var(--plus-zwart);
+            color: white;
+            padding: 20px;
+            border-radius: 10px 10px 0 0;
+            margin-top: 20px;
+        }
+
+        .summary-box {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+
+        .summary-item { text-align: center; }
+        .number { font-size: 1.5em; font-weight: bold; display: block; }
+        
+        .list-output {
+            max-height: 100px;
+            overflow-y: auto;
+            font-size: 0.8em;
+            background: rgba(255,255,255,0.1);
+            padding: 5px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Mijn Voetbalplaatjes 2025-2026</h1>
+</header>
+
+<div class="container" id="app">
+    </div>
+
+<div id="overzicht">
+    <div class="summary-box">
+        <div class="summary-item">
+            <span class="number" id="count-missend">0</span>
+            Plaatjes mis
+        </div>
+        <div class="summary-item">
+            <span class="number" id="count-dubbel">0</span>
+            Dubbel
+        </div>
+        <div class="summary-item">
+            <span class="number" id="count-compleet">0</span>
+            Clubs compleet
+        </div>
+    </div>
+    <div id="lijsten" class="list-output">
+        <strong>Nog nodig:</strong> <span id="lijst-nodig">-</span>
+    </div>
+</div>
+
+<script>
+    // Data gebaseerd op je bestand
+    const data = [
+        { club: "AJAX", start: 1, eind: 16 },
+        { club: "AZ", start: 17, eind: 32 },
+        { club: "Almere City", start: 33, eind: 48 },
+        { club: "Feyenoord", start: 49, eind: 64 },
+        { club: "Fortuna Sittard", start: 65, eind: 80 },
+        { club: "Go Ahead Eagles", start: 81, eind: 96 },
+        { club: "FC Groningen", start: 97, eind: 112 },
+        { club: "sc Heerenveen", start: 113, eind: 128 },
+        { club: "Heracles Almelo", start: 129, eind: 144 },
+        { club: "NAC Breda", start: 145, eind: 160 },
+        { club: "N.E.C. Nijmegen", start: 161, eind: 176 },
+        { club: "PEC Zwolle", start: 177, eind: 192 },
+        { club: "PSV", start: 193, eind: 208 },
+        { club: "RKC Waalwijk", start: 209, eind: 224 },
+        { club: "Sparta Rotterdam", start: 225, eind: 240 },
+        { club: "FC Twente", start: 241, eind: 256 },
+        { club: "FC Utrecht", start: 257, eind: 272 },
+        { club: "Willem II", start: 273, eind: 288 }
+    ];
+
+    // Status bijhouden: plaatjeNummer -> aantal (0,1,2,3)
+    const status = JSON.parse(localStorage.getItem('voetbalStatus')) || {};
+
+    function renderApp() {
+        const app = document.getElementById('app');
+        app.innerHTML = '';
+
+        data.forEach(item => {
+            const section = document.createElement('div');
+            section.className = 'club-section';
+            
+            let stickerHTML = '';
+            let clubCompleet = true;
+
+            for (let i = item.start; i <= item.eind; i++) {
+                const aantal = status[i] || 0;
+                if (aantal === 0) clubCompleet = false;
+
+                stickerHTML += `
+                    <div class="sticker-row">
+                        <strong>#${i}</strong>
+                        <span>Plaatje ${i}</span>
+                        <div class="radio-group">
+                            ${[0, 1, 2, 3].map(v => `
+                                <input type="radio" name="p${i}" value="${v}" ${aantal == v ? 'checked' : ''} onchange="update(${i}, ${v})">
+                                <label>${v}</label>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            section.innerHTML = `
+                <div class="club-header">
+                    <h2>${item.club}</h2>
+                    <span class="status-badge ${clubCompleet ? 'compleet' : 'niet-compleet'}">
+                        ${clubCompleet ? 'COMPLEET' : 'BEZIG'}
+                    </span>
+                </div>
+                ${stickerHTML}
+            `;
+            app.appendChild(section);
+        });
+        updateStats();
+    }
+
+    window.update = (nr, waarde) => {
+        status[nr] = waarde;
+        localStorage.setItem('voetbalStatus', JSON.stringify(status));
+        renderApp();
+    };
+
+    function updateStats() {
+        let mis = [];
+        let dubbel = 0;
+        let completeClubs = 0;
+
+        // Bereken stats
+        for (let i = 1; i <= 288; i++) {
+            const aantal = status[i] || 0;
+            if (aantal === 0) mis.push(i);
+            if (aantal >= 2) dubbel += (aantal - 1);
+        }
+
+        data.forEach(item => {
+            let compleet = true;
+            for (let i = item.start; i <= item.eind; i++) {
+                if ((status[i] || 0) === 0) compleet = false;
+            }
+            if (compleet) completeClubs++;
+        });
+
+        document.getElementById('count-missend').innerText = mis.length;
+        document.getElementById('count-dubbel').innerText = dubbel;
+        document.getElementById('count-compleet').innerText = completeClubs;
+        document.getElementById('lijst-nodig').innerText = mis.length > 0 ? mis.join(', ') : 'Alles compleet!';
+    }
+
+    renderApp();
+</script>
+
+</body>
+</html>
