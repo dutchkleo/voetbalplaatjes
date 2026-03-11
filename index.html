@@ -108,6 +108,10 @@
 
 <header>
     <h1>Mijn Voetbalplaatjes 2025-2026</h1>
+    <div style="background: #eee; padding: 10px; text-align: center; margin-bottom: 20px;">
+    <button onclick="exporteerData()" style="padding: 10px; cursor: pointer;">💾 Opslaan (Bestand downloaden)</button>
+    <button onclick="importeerData()" style="padding: 10px; cursor: pointer;">📂 Laden (Bestand openen)</button>
+
 </header>
 
 <div class="container" id="app">
@@ -253,11 +257,31 @@
         document.getElementById('lijst-nodig').innerText = mis.length > 0 ? mis.join(', ') : 'Alles compleet! 🎉';
         document.getElementById('lijst-dubbel').innerText = dubbelLijst.length > 0 ? dubbelLijst.join(', ') : 'Nog geen dubbelen';
     }
-
+// Hiermee kan je het bestandje inladen op een andere computer
+function importeerData() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = e => {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = readerEvent => {
+            const content = readerEvent.target.result;
+            const nieuweStatus = JSON.parse(content);
+            if (confirm("Weet je het zeker? Dit overschrijft de huidige vinkjes.")) {
+                localStorage.setItem('voetbalStatus', JSON.stringify(nieuweStatus));
+                location.reload(); // Ververs de pagina om de vinkjes te zien
+            }
+        }
+        reader.readAsText(file);
+    }
+    input.click();
+}
     renderApp();
 </script>
 
 </body>
 
 </html>
+
 
