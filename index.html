@@ -255,8 +255,8 @@
         // De tekstlijstjes invullen
         document.getElementById('lijst-nodig').innerText = mis.length > 0 ? mis.join(', ') : 'Alles compleet! 🎉';
         document.getElementById('lijst-dubbel').innerText = dubbelLijst.length > 0 ? dubbelLijst.join(', ') : 'Nog geen dubbelen';
-     }
-    // Bouw de tekst voor de "Nodig" lijst
+    
+        // Bouw de tekst voor de "Nodig" lijst
     let nodigHTML = "";
     for (const [club, nummers] of Object.entries(misPerClub)) {
         nodigHTML += `<strong>${club}:</strong> ${nummers.join(', ')} | `;
@@ -329,6 +329,7 @@ function importeerData() {
 </body>
 
 </html>
+
 
 
 
