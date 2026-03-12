@@ -255,7 +255,22 @@
         // De tekstlijstjes invullen
         document.getElementById('lijst-nodig').innerText = mis.length > 0 ? mis.join(', ') : 'Alles compleet! 🎉';
         document.getElementById('lijst-dubbel').innerText = dubbelLijst.length > 0 ? dubbelLijst.join(', ') : 'Nog geen dubbelen';
+    
+    // Bouw de tekst voor de "Nodig" lijst
+    let nodigHTML = "";
+    for (const [club, nummers] of Object.entries(misPerClub)) {
+        nodigHTML += `<strong>${club}:</strong> ${nummers.join(', ')} | `;
     }
+    document.getElementById('lijst-nodig').innerHTML = nodigHTML || "Alles compleet! 🎉";
+
+    // Bouw de tekst voor de "Dubbel" lijst
+    let dubbelHTML = "";
+    for (const [club, nummers] of Object.entries(dubbelPerClub)) {
+        dubbelHTML += `<strong>${club}:</strong> ${nummers.join(', ')} | `;
+    }
+    document.getElementById('lijst-dubbel').innerHTML = dubbelHTML || "Nog geen dubbelen";
+}
+    
 // Verbeterde export-functie
 function exporteerData() {
     try {
@@ -314,6 +329,7 @@ function importeerData() {
 </body>
 
 </html>
+
 
 
 
